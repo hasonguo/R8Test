@@ -1,0 +1,49 @@
+apply plugin: 'maven-publish'
+def isAndroidProject() {
+    def plugins = project.getPlugins()
+    return plugins.hasPlugin('com.android.application') || plugins.hasPlugin('com.android.library')
+}
+afterEvaluate {
+    publishing {
+        publications {
+            zhihuPlugin(MavenPublication) {
+                if (isAndroidProject()) {
+                    from components.release
+
+                } else {
+                    from components.java
+                }
+                artifactId = project.archivesBaseName
+                println("artifactId: ${artifactId}")
+                pom {
+                    def commitHash = "git rev-parse --short HEAD".execute(null, rootDir).text.trim()
+                    def branchName = "git rev-parse --abbrev-ref HEAD".execute(null, rootDir).text.trim()
+                    def osName = System.getProperty("os.name")
+                    def userName = System.getProperty("user.name")
+
+                    description = "commit hash is $commitHash , branch is ${branchName} , OS name is ${osName} ,user is ${userName}"
+                    contributors {
+                        contributor {
+                            name =  "git config user.name".execute(null, rootDir).text.trim()
+                            email =  "git config user.email".execute(null, rootDir).text.trim()
+                        }
+                    }
+                }
+            }
+        }
+        repositories {
+            maven {
+                def releasesRepoUrl = 'http://android-maven.dev.zhihu.com/repository/maven-releases/'
+                def snapshotsRepoUrl = 'http://android-maven.dev.zhihu.com/repository/maven-snapshots/'
+                url = version.endsWith("-SNAPSHOT") ? snapshotsRepoUrl : releasesRepoUrl
+                credentials {
+                    username = 'android-deployment'
+                    password = 'android-dev-123'
+                }
+            }
+
+        }
+    }
+    task uploadLocalRepo(dependsOn: publishZhihuPluginPublicationToMavenLocal)
+    task uploadArchives(dependsOn: publishZhihuPluginPublicationToMavenRepository)
+}
