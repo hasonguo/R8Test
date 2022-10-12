@@ -6,5 +6,5 @@ package com.zhihu.module1;
  * @since :  2022/10/11 16:18
  */
 public class Module1 {
-    public String field2;
+    public String field;
 }

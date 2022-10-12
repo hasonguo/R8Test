@@ -11,7 +11,7 @@ import com.zhihu.module1.Module1;
 public class Module2 {
     public void method() {
         Module1 module1 = new Module1();
-        String field1 = module1.field1;
+        String field1 = module1.field;
         System.out.println(field1);
     }
 }
