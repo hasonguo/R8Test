@@ -1,0 +1,67 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    compileSdk 31
+
+    defaultConfig {
+        applicationId "com.zhihu.myapplication"
+        minSdk 21
+        targetSdk 31
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    buildFeatures {
+        viewBinding true
+    }
+}
+
+dependencies {
+
+    implementation 'androidx.appcompat:appcompat:1.4.0'
+    implementation 'com.google.android.material:material:1.6.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.navigation:navigation-fragment:2.5.2'
+    implementation 'androidx.navigation:navigation-ui:2.5.2'
+    testImplementation 'junit:junit:4.+'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    // depend 3.0 remove field
+    implementation 'com.github.hasonguo:R8Test:3.0.0'
+    // depend module2
+    implementation project(":module2")
+
+}
+
+afterEvaluate {
+    android.applicationVariants.all { variant ->
+        def r8TaskName = "minify${variant.name.capitalize()}WithR8"
+
+        def r8Task = project.tasks.findByName(r8TaskName)
+        if (r8Task == null) {
+            r8TaskName = "transformClassesAndResourcesWithR8For${variant.name.capitalize()}";
+            r8Task = project.tasks.findByName(r8TaskName)
+        }
+        if (r8Task != null) {
+            r8Task.doFirst {
+                r8Task.proguardConfigurations.clear()
+            }
+            println("")
+            println("r8Task  r8Task : " + (r8Task == null))
+        }
+    }
+}
